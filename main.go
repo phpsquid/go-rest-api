@@ -13,13 +13,19 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello Go + Docker")
 }
 
+func ErrorHandler(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintln(w, "Error test")
+	log.Fatal("intentional error")
+}
+
 func main() {
 	fmt.Println("Go Docker tutorial")
 
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", HomeHandler)
-
+	r.HandleFunc("/error", ErrorHandler)
+	
 	srv := &http.Server{
 		Handler: r,
 		Addr:    ":8080",
