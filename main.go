@@ -4,18 +4,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello Go + Docker")
+	dbURL := os.Getenv("DB_USERNAME")
+	fmt.Fprintln(w, "DB_USERNAME =", dbURL)
 }
 
 func ErrorHandler(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintln(w, "Error test")
-	log.Fatal("intentional error")
+	fmt.Fprintln(w, "Error test")
 }
 
 func main() {
@@ -25,7 +26,7 @@ func main() {
 
 	r.HandleFunc("/", HomeHandler)
 	r.HandleFunc("/error", ErrorHandler)
-	
+
 	srv := &http.Server{
 		Handler: r,
 		Addr:    ":8080",
