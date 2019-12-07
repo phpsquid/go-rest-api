@@ -1,39 +1,34 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"time"
+	"phpsquid/myapi/user"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/render"
 )
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	dbURL := os.Getenv("DB_USERNAME")
-	fmt.Fprintln(w, "DB_USERNAME =", dbURL)
-}
+func Routes() *chi.Mux {
+	router := chi.NewRouter()
+	router.Use(
+		render.SetContentType(render.ContentTypeJSON),
+		middleware.Logger,
+		middleware.DefaultCompress,
+		middleware.RedirectSlashes,
+		middleware.Recoverer,
+	)
 
-func ErrorHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Error test")
+	router.Route("/v1", func(r chi.Router) {
+		r.Mount("/api/user", user.Routes())
+	})
+
+	return router
 }
 
 func main() {
-	fmt.Println("Go Docker tutorial")
+	router := Routes()
 
-	r := mux.NewRouter()
-
-	r.HandleFunc("/", HomeHandler)
-	r.HandleFunc("/error", ErrorHandler)
-
-	srv := &http.Server{
-		Handler: r,
-		Addr:    ":8080",
-		// Good practice: enforce timeouts for servers you create!
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
-
-	log.Fatal(srv.ListenAndServe())
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
